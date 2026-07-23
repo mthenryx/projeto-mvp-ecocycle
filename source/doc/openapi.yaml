@@ -1,0 +1,2270 @@
+openapi: 3.0.3
+info:
+  title: EcoCycle API
+  description: API para controlar o projeto EcoCycle
+  version: 1.0.7.26
+  contact:
+    name: Matheus Henry Dev
+    email: 09matheushenry@gmail.com
+servers:
+  - url: http://localhost:3000
+    description: Ambiente de desenvolvimento local
+tags:
+  - name: Autenticação
+    description: Endpoints de login e emissão de token JWT
+  - name: Doadores
+    description: Cadastro e gerenciamento de usuários do tipo Doador
+  - name: Coletores
+    description: Cadastro e gerenciamento de usuários do tipo Coletor/Cooperativa
+  - name: Pontos de Coleta
+    description: Cadastro, listagem e gerenciamento de pontos de coleta de resíduos
+  - name: Categorias de Resíduos
+    description: Gerenciamento das categorias de resíduos recicláveis
+  - name: Endereços
+    description: Gerenciamento dos endereços vinculados aos pontos de coleta
+  - name: Cidades
+    description: Gerenciamento das cidades utilizadas nos endereços
+  - name: Estados
+    description: Gerenciamento dos estados utilizados nas cidades
+paths:
+  /v1/ecocycle/auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Autenticar usuário
+      description: Realiza a autenticação de um Doador ou Coletor utilizando e-mail e senha, retornando um token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+            example:
+              email: joao.silva@email.com
+              senha: SenhaForte123
+              tipo_perfil: doador
+      responses:
+        '200':
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/LoginResponse'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exemplo
+                  tipo_perfil: doador
+                  usuario:
+                    id: 1
+                    nome: João da Silva
+                    email: joao.silva@email.com
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/doadores:
+    post:
+      tags:
+        - Doadores
+      summary: Cadastrar um novo Doador
+      description: Cria um novo usuário do tipo Doador informando nome, e-mail e senha.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoadorInput'
+            example:
+              nome: João da Silva
+              email: joao.silva@email.com
+              senha: SenhaForte123
+      responses:
+        '201':
+          description: Doador cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Doador'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 1
+                  nome: João da Silva
+                  email: joao.silva@email.com
+                  data_criacao_conta: '2026-07-23'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Doadores
+      summary: Listar Doadores
+      description: Retorna a lista de usuários do tipo Doador cadastrados.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Lista de doadores retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Doador'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 1
+                    nome: João da Silva
+                    email: joao.silva@email.com
+                    data_criacao_conta: '2026-07-23'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/doadores/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do Doador
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Doadores
+      summary: Buscar Doador por ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doador encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Doador'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome: João da Silva
+                  email: joao.silva@email.com
+                  data_criacao_conta: '2026-07-23'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Doadores
+      summary: Atualizar dados de um Doador
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoadorInput'
+            example:
+              nome: João da Silva Junior
+              email: joao.silva@email.com
+              senha: NovaSenhaForte456
+      responses:
+        '200':
+          description: Doador atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Doador'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome: João da Silva Junior
+                  email: joao.silva@email.com
+                  data_criacao_conta: '2026-07-23'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Doadores
+      summary: Remover um Doador
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doador removido com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/coletores:
+    post:
+      tags:
+        - Coletores
+      summary: Cadastrar um novo Coletor/Cooperativa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColetorInput'
+            example:
+              nome: Cooperativa Recicla Mais
+              email: contato@reciclamais.com
+              senha: SenhaForte123
+      responses:
+        '201':
+          description: Coletor cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Coletor'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 1
+                  nome: Cooperativa Recicla Mais
+                  email: contato@reciclamais.com
+                  data_criacao_conta: '2026-07-23'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Coletores
+      summary: Listar Coletores/Cooperativas
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Lista de coletores retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Coletor'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 1
+                    nome: Cooperativa Recicla Mais
+                    email: contato@reciclamais.com
+                    data_criacao_conta: '2026-07-23'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/coletores/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do Coletor
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Coletores
+      summary: Buscar Coletor por ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Coletor encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Coletor'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome: Cooperativa Recicla Mais
+                  email: contato@reciclamais.com
+                  data_criacao_conta: '2026-07-23'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Coletores
+      summary: Atualizar dados de um Coletor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColetorInput'
+            example:
+              nome: Cooperativa Recicla Mais Ltda
+              email: contato@reciclamais.com
+              senha: NovaSenhaForte456
+      responses:
+        '200':
+          description: Coletor atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Coletor'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome: Cooperativa Recicla Mais Ltda
+                  email: contato@reciclamais.com
+                  data_criacao_conta: '2026-07-23'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Coletores
+      summary: Remover um Coletor
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Coletor removido com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/pontos-coleta:
+    post:
+      tags:
+        - Pontos de Coleta
+      summary: Cadastrar um novo ponto de coleta
+      description: Um usuário Doador cadastra um novo ponto de coleta contendo título, descrição do material, categorias, endereço e quantidade estimada.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PontoColetaInput'
+            example:
+              titulo: Óleo de cozinha usado
+              descricao_do_material: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+              id_endereco: 3
+              quantidade_estimada: 5
+              foto: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+              categorias_residuos:
+                - 4
+      responses:
+        '201':
+          description: Ponto de coleta cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/PontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 10
+                  titulo: Óleo de cozinha usado
+                  descricao_do_material: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+                  status: Pendente
+                  id_endereco: 3
+                  quantidade_estimada: 5
+                  id_doador: 1
+                  foto: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+                  data_horario: '2026-07-23T14:30:00Z'
+                  categorias_residuos:
+                    - 4
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Pontos de Coleta
+      summary: Listar pontos de coleta disponíveis
+      description: Qualquer usuário pode visualizar os pontos de coleta cadastrados, com filtros opcionais por status, categoria e cidade.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          required: false
+          description: Filtra pontos de coleta pelo status atual
+          schema:
+            type: string
+            enum:
+              - Pendente
+              - Em Andamento
+              - Finalizado
+          example: Pendente
+        - name: id_categoria_residuos
+          in: query
+          required: false
+          description: Filtra pontos de coleta por categoria de resíduo
+          schema:
+            type: integer
+          example: 4
+        - name: id_cidade
+          in: query
+          required: false
+          description: Filtra pontos de coleta pela cidade do endereço vinculado
+          schema:
+            type: integer
+          example: 2
+      responses:
+        '200':
+          description: Lista de pontos de coleta retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 10
+                    titulo: Óleo de cozinha usado
+                    descricao_do_material: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+                    status: Pendente
+                    id_endereco: 3
+                    quantidade_estimada: 5
+                    id_doador: 1
+                    foto: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+                    data_horario: '2026-07-23T14:30:00Z'
+                    categorias_residuos:
+                      - 4
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/pontos-coleta/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do ponto de coleta
+        schema:
+          type: integer
+        example: 10
+    get:
+      tags:
+        - Pontos de Coleta
+      summary: Buscar ponto de coleta por ID
+      responses:
+        '200':
+          description: Ponto de coleta encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/PontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 10
+                  titulo: Óleo de cozinha usado
+                  descricao_do_material: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+                  status: Pendente
+                  id_endereco: 3
+                  quantidade_estimada: 5
+                  id_doador: 1
+                  foto: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+                  data_horario: '2026-07-23T14:30:00Z'
+                  categorias_residuos:
+                    - 4
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Pontos de Coleta
+      summary: Atualizar dados de um ponto de coleta
+      description: Permite que o Doador responsável atualize os dados do ponto de coleta.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PontoColetaInput'
+            example:
+              titulo: Óleo de cozinha usado (atualizado)
+              descricao_do_material: 8 litros de óleo de cozinha usado armazenados em garrafas PET
+              id_endereco: 3
+              quantidade_estimada: 8
+              foto: https://cdn.ecocycle.com/uploads/oleo-cozinha-2.jpg
+              categorias_residuos:
+                - 4
+      responses:
+        '200':
+          description: Ponto de coleta atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/PontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 10
+                  titulo: Óleo de cozinha usado (atualizado)
+                  descricao_do_material: 8 litros de óleo de cozinha usado armazenados em garrafas PET
+                  status: Pendente
+                  id_endereco: 3
+                  quantidade_estimada: 8
+                  id_doador: 1
+                  foto: https://cdn.ecocycle.com/uploads/oleo-cozinha-2.jpg
+                  data_horario: '2026-07-23T14:30:00Z'
+                  categorias_residuos:
+                    - 4
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Pontos de Coleta
+      summary: Remover um ponto de coleta
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ponto de coleta removido com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 10
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 10
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/pontos-coleta/{id}/status:
+    patch:
+      tags:
+        - Pontos de Coleta
+      summary: Atualizar o status de um ponto de coleta
+      description: Uma cooperativa/coletor cadastrado altera o status de um ponto de coleta entre Pendente, Em Andamento e Finalizado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do ponto de coleta
+          schema:
+            type: integer
+          example: 10
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdateInput'
+            example:
+              status: Em Andamento
+      responses:
+        '200':
+          description: Status do ponto de coleta atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/PontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 10
+                  titulo: Óleo de cozinha usado
+                  descricao_do_material: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+                  status: Em Andamento
+                  id_endereco: 3
+                  quantidade_estimada: 5
+                  id_doador: 1
+                  foto: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+                  data_horario: '2026-07-23T14:30:00Z'
+                  categorias_residuos:
+                    - 4
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/pontos-coleta/{id}/coletores:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do ponto de coleta
+        schema:
+          type: integer
+        example: 10
+    post:
+      tags:
+        - Pontos de Coleta
+      summary: Vincular um Coletor a um ponto de coleta
+      description: Uma cooperativa/coletor assume a responsabilidade pela retirada de um ponto de coleta.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColetorPontoColetaInput'
+            example:
+              id_coletor: 1
+      responses:
+        '201':
+          description: Coletor vinculado ao ponto de coleta com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/ColetorPontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 5
+                  id_coletor: 1
+                  id_ponto_de_coleta: 10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Pontos de Coleta
+      summary: Listar Coletores vinculados a um ponto de coleta
+      responses:
+        '200':
+          description: Lista de coletores vinculados retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ColetorPontoColeta'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 5
+                    id_coletor_id: 1
+                    id_ponto_de_coleta_id: 10
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/pontos-coleta/{id}/coletores/{coletorId}:
+    delete:
+      tags:
+        - Pontos de Coleta
+      summary: Desvincular um Coletor de um ponto de coleta
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do ponto de coleta
+          schema:
+            type: integer
+          example: 10
+        - name: coletorId
+          in: path
+          required: true
+          description: Identificador único do Coletor
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Coletor desvinculado do ponto de coleta com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id_ponto_de_coleta:
+                            type: integer
+                            example: 10
+                          id_coletor:
+                            type: integer
+                            example: 1
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id_ponto_de_coleta: 10
+                  id_coletor: 1
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/categorias-residuos:
+    post:
+      tags:
+        - Categorias de Resíduos
+      summary: Cadastrar uma nova categoria de resíduo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaResiduoInput'
+            example:
+              nome_categoria_residuos: Óleo de Cozinha
+      responses:
+        '201':
+          description: Categoria de resíduo cadastrada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/CategoriaResiduo'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 4
+                  nome_categoria_residuos: Óleo de Cozinha
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Categorias de Resíduos
+      summary: Listar categorias de resíduos
+      responses:
+        '200':
+          description: Lista de categorias de resíduos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoriaResiduo'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 1
+                    nome_categoria_residuos: Eletrônicos
+                  - id: 2
+                    nome_categoria_residuos: Plástico
+                  - id: 3
+                    nome_categoria_residuos: Papel
+                  - id: 4
+                    nome_categoria_residuos: Óleo de Cozinha
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/categorias-residuos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único da categoria de resíduo
+        schema:
+          type: integer
+        example: 4
+    get:
+      tags:
+        - Categorias de Resíduos
+      summary: Buscar categoria de resíduo por ID
+      responses:
+        '200':
+          description: Categoria de resíduo encontrada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/CategoriaResiduo'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 4
+                  nome_categoria_residuos: Óleo de Cozinha
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Categorias de Resíduos
+      summary: Atualizar uma categoria de resíduo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaResiduoInput'
+            example:
+              nome_categoria_residuos: Óleo de Cozinha Usado
+      responses:
+        '200':
+          description: Categoria de resíduo atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/CategoriaResiduo'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 4
+                  nome_categoria_residuos: Óleo de Cozinha Usado
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Categorias de Resíduos
+      summary: Remover uma categoria de resíduo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categoria de resíduo removida com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 4
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 4
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/enderecos:
+    post:
+      tags:
+        - Endereços
+      summary: Cadastrar um novo endereço
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnderecoInput'
+            example:
+              logradouro: Rua das Flores
+              complemento: Apto 302
+              cep: 01310-100
+              id_cidade: 2
+              numero: '450'
+      responses:
+        '201':
+          description: Endereço cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Endereco'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 3
+                  logradouro: Rua das Flores
+                  complemento: Apto 302
+                  cep: 01310-100
+                  id_cidade: 2
+                  numero: '450'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Endereços
+      summary: Listar endereços cadastrados
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Lista de endereços retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Endereco'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 3
+                    logradouro: Rua das Flores
+                    complemento: Apto 302
+                    cep: 01310-100
+                    id_cidade: 2
+                    numero: '450'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/enderecos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do endereço
+        schema:
+          type: integer
+        example: 3
+    get:
+      tags:
+        - Endereços
+      summary: Buscar endereço por ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Endereço encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Endereco'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 3
+                  logradouro: Rua das Flores
+                  complemento: Apto 302
+                  cep: 01310-100
+                  id_cidade: 2
+                  numero: '450'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Endereços
+      summary: Atualizar um endereço
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnderecoInput'
+            example:
+              logradouro: Rua das Flores
+              complemento: Apto 305
+              cep: 01310-100
+              id_cidade: 2
+              numero: '450'
+      responses:
+        '200':
+          description: Endereço atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Endereco'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 3
+                  logradouro: Rua das Flores
+                  complemento: Apto 305
+                  cep: 01310-100
+                  id_cidade: 2
+                  numero: '450'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Endereços
+      summary: Remover um endereço
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Endereço removido com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 3
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 3
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/cidades:
+    post:
+      tags:
+        - Cidades
+      summary: Cadastrar uma nova cidade
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CidadeInput'
+            example:
+              nome_cidade: São Paulo
+              id_estado: 1
+      responses:
+        '201':
+          description: Cidade cadastrada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Cidade'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 2
+                  nome_cidade: São Paulo
+                  id_estado: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Cidades
+      summary: Listar cidades cadastradas
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: id_estado
+          in: query
+          required: false
+          description: Filtra cidades pelo estado
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de cidades retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Cidade'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 2
+                    nome_cidade: São Paulo
+                    id_estado: 1
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/cidades/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único da cidade
+        schema:
+          type: integer
+        example: 2
+    get:
+      tags:
+        - Cidades
+      summary: Buscar cidade por ID
+      responses:
+        '200':
+          description: Cidade encontrada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Cidade'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 2
+                  nome_cidade: São Paulo
+                  id_estado: 1
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Cidades
+      summary: Atualizar uma cidade
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CidadeInput'
+            example:
+              nome_cidade: São Paulo
+              id_estado: 1
+      responses:
+        '200':
+          description: Cidade atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Cidade'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 2
+                  nome_cidade: São Paulo
+                  id_estado: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Cidades
+      summary: Remover uma cidade
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cidade removida com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 2
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 2
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/estados:
+    post:
+      tags:
+        - Estados
+      summary: Cadastrar um novo estado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstadoInput'
+            example:
+              nome_estado: São Paulo
+              sigla: SP
+      responses:
+        '201':
+          description: Estado cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Estado'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 201
+                response:
+                  id: 1
+                  nome_estado: São Paulo
+                  sigla: SP
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - Estados
+      summary: Listar estados cadastrados
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Lista de estados retornada com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Estado'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  - id: 1
+                    nome_estado: São Paulo
+                    sigla: SP
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/ecocycle/estados/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador único do estado
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Estados
+      summary: Buscar estado por ID
+      responses:
+        '200':
+          description: Estado encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Estado'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome_estado: São Paulo
+                  sigla: SP
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags:
+        - Estados
+      summary: Atualizar um estado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstadoInput'
+            example:
+              nome_estado: São Paulo
+              sigla: SP
+      responses:
+        '200':
+          description: Estado atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        $ref: '#/components/schemas/Estado'
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  nome_estado: São Paulo
+                  sigla: SP
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags:
+        - Estados
+      summary: Remover um estado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estado removido com sucesso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelopeBase'
+                  - type: object
+                    properties:
+                      response:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          removido:
+                            type: boolean
+                            example: true
+              example:
+                api_description: API para controlar o projeto EcoCycle
+                development: Matheus Henry dos Santos
+                version: 1.0.7.26
+                status: true
+                status_code: 200
+                response:
+                  id: 1
+                  removido: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      required: false
+      description: Número da página de resultados
+      schema:
+        type: integer
+        default: 1
+      example: 1
+    LimitParam:
+      name: limit
+      in: query
+      required: false
+      description: Quantidade de registros por página
+      schema:
+        type: integer
+        default: 10
+      example: 10
+  responses:
+    BadRequest:
+      description: Erro de validação nos dados enviados
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: false
+            status_code: 400
+            message: Não foi possível processar a requisição devido a erros de entrada de dados.
+    Unauthorized:
+      description: Usuário não autenticado ou token inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: false
+            status_code: 401
+            message: Não foi possível processar a requisição pois o usuário não está autenticado.
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: false
+            status_code: 404
+            message: Não foi possível processar a requisição pois o recurso solicitado não foi encontrado.
+    InternalError:
+      description: Erro interno no servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: false
+            status_code: 500
+            message: Não foi possível processar a requisição devido a um erro interno no servidor.
+  schemas:
+    SuccessEnvelopeBase:
+      type: object
+      required:
+        - api_description
+        - development
+        - version
+        - status
+        - status_code
+        - response
+      properties:
+        api_description:
+          type: string
+          example: API para controlar o projeto EcoCycle
+        development:
+          type: string
+          example: Matheus Henry dos Santos
+        version:
+          type: string
+          example: 1.0.7.26
+        status:
+          type: boolean
+          example: true
+        status_code:
+          type: integer
+          example: 200
+        response:
+          type: object
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - status_code
+        - message
+      properties:
+        status:
+          type: boolean
+          example: false
+        status_code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Não foi possível processar a requisição devido a erros de entrada de dados.
+    LoginInput:
+      type: object
+      required:
+        - email
+        - senha
+        - tipo_perfil
+      properties:
+        email:
+          type: string
+          format: email
+          example: joao.silva@email.com
+        senha:
+          type: string
+          format: password
+          example: SenhaForte123
+        tipo_perfil:
+          type: string
+          enum:
+            - doador
+            - coletor
+          example: doador
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exemplo
+        tipo_perfil:
+          type: string
+          enum:
+            - doador
+            - coletor
+          example: doador
+        usuario:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nome:
+              type: string
+              example: João da Silva
+            email:
+              type: string
+              format: email
+              example: joao.silva@email.com
+    DoadorInput:
+      type: object
+      required:
+        - nome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+          maxLength: 100
+          example: João da Silva
+        email:
+          type: string
+          format: email
+          maxLength: 256
+          example: joao.silva@email.com
+        senha:
+          type: string
+          format: password
+          maxLength: 20
+          example: SenhaForte123
+    Doador:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: João da Silva
+        email:
+          type: string
+          format: email
+          example: joao.silva@email.com
+        data_criacao_conta:
+          type: string
+          format: date
+          example: '2026-07-23'
+    ColetorInput:
+      type: object
+      required:
+        - nome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+          maxLength: 100
+          example: Cooperativa Recicla Mais
+        email:
+          type: string
+          format: email
+          maxLength: 256
+          example: contato@reciclamais.com
+        senha:
+          type: string
+          format: password
+          maxLength: 20
+          example: SenhaForte123
+    Coletor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: Cooperativa Recicla Mais
+        email:
+          type: string
+          format: email
+          example: contato@reciclamais.com
+        data_criacao_conta:
+          type: string
+          format: date
+          example: '2026-07-23'
+    PontoColetaInput:
+      type: object
+      required:
+        - titulo
+        - descricao_do_material
+        - id_endereco
+        - quantidade_estimada
+        - categorias_residuos
+      properties:
+        titulo:
+          type: string
+          maxLength: 35
+          example: Óleo de cozinha usado
+        descricao_do_material:
+          type: string
+          maxLength: 100
+          example: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+        id_endereco:
+          type: integer
+          example: 3
+        quantidade_estimada:
+          type: integer
+          example: 5
+        foto:
+          type: string
+          maxLength: 2000
+          example: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+        categorias_residuos:
+          type: array
+          items:
+            type: integer
+          example:
+            - 4
+    PontoColeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        titulo:
+          type: string
+          example: Óleo de cozinha usado
+        descricao_do_material:
+          type: string
+          example: 5 litros de óleo de cozinha usado armazenados em garrafas PET
+        status:
+          type: string
+          enum:
+            - Pendente
+            - Em Andamento
+            - Finalizado
+          example: Pendente
+        id_endereco:
+          type: integer
+          example: 3
+        quantidade_estimada:
+          type: integer
+          example: 5
+        id_doador:
+          type: integer
+          example: 1
+        foto:
+          type: string
+          example: https://cdn.ecocycle.com/uploads/oleo-cozinha.jpg
+        data_horario:
+          type: string
+          format: date-time
+          example: '2026-07-23T14:30:00Z'
+        categorias_residuos:
+          type: array
+          items:
+            type: integer
+          example:
+            - 4
+    StatusUpdateInput:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - Pendente
+            - Em Andamento
+            - Finalizado
+          example: Em Andamento
+    ColetorPontoColetaInput:
+      type: object
+      required:
+        - id_coletor
+      properties:
+        id_coletor:
+          type: integer
+          example: 1
+    ColetorPontoColeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        id_coletor:
+          type: integer
+          example: 1
+        id_ponto_de_coleta:
+          type: integer
+          example: 10
+    CategoriaResiduoInput:
+      type: object
+      required:
+        - nome_categoria_residuos
+      properties:
+        nome_categoria_residuos:
+          type: string
+          maxLength: 30
+          example: Óleo de Cozinha
+    CategoriaResiduo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        nome_categoria_residuos:
+          type: string
+          example: Óleo de Cozinha
+    EnderecoInput:
+      type: object
+      required:
+        - logradouro
+        - cep
+        - id_cidade
+        - numero
+      properties:
+        logradouro:
+          type: string
+          maxLength: 50
+          example: Rua das Flores
+        complemento:
+          type: string
+          maxLength: 50
+          example: Apto 302
+        cep:
+          type: string
+          maxLength: 10
+          example: 01310-100
+        id_cidade:
+          type: integer
+          example: 2
+        numero:
+          type: string
+          maxLength: 5
+          example: '450'
+    Endereco:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        logradouro:
+          type: string
+          example: Rua das Flores
+        complemento:
+          type: string
+          example: Apto 302
+        cep:
+          type: string
+          example: 01310-100
+        id_cidade:
+          type: integer
+          example: 2
+        numero:
+          type: string
+          example: '450'
+    CidadeInput:
+      type: object
+      required:
+        - nome_cidade
+        - id_estado
+      properties:
+        nome_cidade:
+          type: string
+          maxLength: 30
+          example: São Paulo
+        id_estado:
+          type: integer
+          example: 1
+    Cidade:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        nome_cidade:
+          type: string
+          example: São Paulo
+        id_estado:
+          type: integer
+          example: 1
+    EstadoInput:
+      type: object
+      required:
+        - nome_estado
+        - sigla
+      properties:
+        nome_estado:
+          type: string
+          maxLength: 30
+          example: São Paulo
+        sigla:
+          type: string
+          maxLength: 3
+          example: SP
+    Estado:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome_estado:
+          type: string
+          example: São Paulo
+        sigla:
+          type: string
+          example: SP
+security:
+  - bearerAuth: []

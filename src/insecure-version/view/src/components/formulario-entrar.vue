@@ -10,17 +10,28 @@
             <span>Cadastro</span>
         </div>
         <form>
-            <input 
-                type="email" 
-                placeholder="Ex: ecocycle@gmail.com" 
-                v-model="email" 
-                class="input"
-            />
-            <input 
-                type="text" 
-                placeholder="*******" 
-                v-model="password" 
-                class="input"
+            <div>
+                <label for="email">Email</label>
+                <input 
+                    type="email" 
+                    placeholder="Ex: ecocycle@gmail.com" 
+                    v-model="email" 
+                    class="input"
+                />
+            </div>
+            <div>
+                <label for="password">Senha</label>
+                <input 
+                    type="text" 
+                    placeholder="*******" 
+                    v-model="password" 
+                    class="input"
+                />
+            </div>
+            <img 
+                src="../assets/imgs/olho-aberto.png" 
+                alt="Olho" 
+                class="olho"
             />
             <button type="submit" @click="fazerLogin" class="btn-entrar">
                 Entrar
@@ -31,6 +42,7 @@
 
 <style scoped>
     .login {
+        padding: 20px;
         border: 1px solid #000;
         width: 30%;
         height: 40%;
@@ -44,21 +56,28 @@
     }
 
     .login-header {
-
+        width: 90%;
+        display: flex;
+        border: 1px solid #000;
+        border-radius: 10px;
     }
 
     form {
         display: flex;
         flex-direction: column;
         gap: 20px;
+        align-items: center;
+        justify-content: center;
+        width: 90%;
     }
 
     .input {
+        padding-left: 12px;
         height: 35px;
-        width: 100%;
+        width: 95%;
         background-color: #D9D9D9;
         border: none;
-        border-radius: 10px;
+        border-radius: 15px;
     }
 
     .btn-entrar {

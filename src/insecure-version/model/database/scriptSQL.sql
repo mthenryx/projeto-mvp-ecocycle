@@ -11,7 +11,7 @@ create table tbl_doador (
     nome 				varchar(100) not null,
     email				varchar(256) not null,
     senha				varchar(20) not null,
-    data_criacao_conta	date not null
+    data_criacao_conta	date not null default (current_date)
 );
 
 create table tbl_coletor (

@@ -13,8 +13,8 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 //Import do arquivo de rotas
-
-
+const doadorRouter = require('./routes/doador.router.js')
+app.use('/v1/ecocycle/doadores', cors(), doadorRouter)
 
 app.listen(8080, function () {
     console.log('API aguardando novas requisições...')

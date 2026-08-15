@@ -21,6 +21,12 @@ const SUCCESS_RESPONSE = {
     message: 'Operação bem-sucedida'
 }
 
+const SUCCESS_UPDATE_ITEM = {
+    status: true,
+    status_code: 200,
+    message: 'Item atualizado com sucesso!'
+}
+
 // Mensagens de erro
 
 const ERROR_BAD_REQUEST = {
@@ -41,6 +47,12 @@ const ERROR_NOT_FOUND = {
     message: 'Não foi possível processar a requisição pois o recurso solicitado não foi encontrado.'
 }
 
+const ERROR_CONTENT_TYPE = {
+    status: false,
+    status_code: 415,
+    message: 'Não foi possível processar a requisição, pois o formato de dados encaminhado não é suportado pelo servidor, apenas deve ser utilizado JSON.'
+}
+
 const ERROR_INTERNAL_SERVER_MODEL = {
     status: false,
     status_code: 500,
@@ -57,9 +69,11 @@ module.exports = {
     DEFAULT_MESSAGE,
     SUCCESS_CREATED_ITEM,
     SUCCESS_RESPONSE,
+    SUCCESS_UPDATE_ITEM,
     ERROR_BAD_REQUEST,
     ERROR_NOT_REGISTER,
     ERROR_NOT_FOUND,
+    ERROR_CONTENT_TYPE,
     ERROR_INTERNAL_SERVER_MODEL,
     ERROR_INTERNAL_SERVER_CONTROLLER
 }
